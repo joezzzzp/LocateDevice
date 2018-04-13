@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">设备位置查询</string>
+    <string name="sn_edit_hint">请输入设备序列号(sn)</string>
+    <string name="sn_empty_hint">设备号不能为空</string>
+    <string name="query_button">查询</string>
+    <string name="progress_dialog_loading_text">加载中…</string>
+    <string name="progress_dialog_query_text">正在查询…</string>
+    <string name="query_failed">查询失败</string>
+    <string name="init_failed">初始化失败</string>
+    <string name="clear_history">清除历史记录…</string>
+    <string name="device_sn_does_not_exist">您所查询的设备号不存在</string>
+
+    <string name="label">标签</string>
+    <string name="content">内容</string>
+
+</resources>

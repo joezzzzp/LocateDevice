@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="device_location_info_label_array">
+        <item>序列号</item>
+        <item>采集时间</item>
+        <item>纬度(LBS)</item>
+        <item>经度(LBS)</item>
+        <item>纬度(GPS)</item>
+        <item>经度(GPS)</item>
+    </string-array>
+</resources>
