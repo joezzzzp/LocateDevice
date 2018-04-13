@@ -1,16 +1,46 @@
 <resources>
-    <string name="app_name">设备位置查询</string>
+    <string name="app_name">设备查询</string>
     <string name="sn_edit_hint">请输入设备序列号(sn)</string>
     <string name="sn_empty_hint">设备号不能为空</string>
     <string name="query_button">查询</string>
-    <string name="progress_dialog_loading_text">加载中…</string>
-    <string name="progress_dialog_query_text">正在查询…</string>
+    <string name="progress_dialog_loading_text">加载中&#8230;</string>
+    <string name="progress_dialog_query_text">正在查询&#8230;</string>
     <string name="query_failed">查询失败</string>
     <string name="init_failed">初始化失败</string>
-    <string name="clear_history">清除历史记录…</string>
+    <string name="clear_history">清除历史记录&#8230;</string>
     <string name="device_sn_does_not_exist">您所查询的设备号不存在</string>
+
+    <string name="type_in_group_name_hint">请输入新建分组名称</string>
+
+    <string name="cancel">取消</string>
+    <string name="confirm">确定</string>
+    <string name="delete_title">提示</string>
+    <string name="delete_content">确定要删除分组 "%s" 吗</string>
 
     <string name="label">标签</string>
     <string name="content">内容</string>
 
+    <string name="btn_query_all">全  部  查  询</string>
+    <string name="btn_import">导  入  文  件</string>
+
+    <string name="create_new_group">新建分组</string>
+
+    <string name="group_contains_nothing">此分组不包含任何设备</string>
+    <string name="update_group_failed">更新分组失败</string>
+    <string name="group_name_belongs_to">所属分组</string>
+    <string name="history_label">历史记录</string>
+    <string name="click_to_show_history">点击查看&#8230;</string>
+    <string name="click_to_modify_group">(修改&#8230;)</string>
+    <string name="click_to_show_location">点击显示设备位置</string>
+
+    <string name="hint_no_gps">未能获取到GPS信息，展示LBS位置信息</string>
+    <string name="hint_no_token">连接服务器失败</string>
+
+    <string name="time_format">yyyy年MM月dd日 HH时mm分ss秒</string>
+
+    <string name="abnormal">(异常)</string>
+
+    <string name="invalid_file_type">所选文件类型不正确</string>
+
+    <string name="can_not_get_device_info">未能查询到此设备的状态信息</string>
 </resources>

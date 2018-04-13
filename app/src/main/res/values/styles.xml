@@ -8,4 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="style_can_click">
+        <item name="android:textColor">#2196F3</item>
+    </style>
+
+    <style name="style_error">
+        <item name="android:textColor">@android:color/holo_red_light</item>
+    </style>
+
 </resources>

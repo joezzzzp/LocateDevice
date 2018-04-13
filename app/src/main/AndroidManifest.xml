@@ -3,26 +3,43 @@
           package="com.zzz.www.smartdevice">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".main.DeviceApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".main.query.MainActivity"
+        <meta-data
+            android:name="App_Id"
+            android:value="f77777syCWWif2r2U1B944A3816x12aV"/>
+        <meta-data
+            android:name="Product_Key"
+            android:value="a525808371b5"/>
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="UP1V3LLVhSOflmc8oVh0AcXZQd5cDWQ5" />
+        <activity android:name=".main.query.GroupActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name=".main.show.DeviceLocationInfoActivity"
+        <activity android:name=".main.show.DeviceDetailsActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
+        <activity android:name=".main.location.MapActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

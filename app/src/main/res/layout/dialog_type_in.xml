@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    android:layout_gravity="center_horizontal"
+    android:paddingStart="30dp"
+    android:paddingEnd="30dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
+
+    <EditText
+        android:id="@+id/etGroupName"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/transparent"
+        android:hint="@string/type_in_group_name_hint"/>
+
+    <TextView
+        android:id="@+id/btnCancel"
+        android:layout_width="70dp"
+        android:layout_height="35dp"
+        android:layout_below="@+id/etGroupName"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/button_round_corner_frame_solid_blue"
+        android:gravity="center"
+        android:text="@string/cancel"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/btnConfirm"
+        android:layout_width="70dp"
+        android:layout_height="35dp"
+        android:layout_alignEnd="@+id/etGroupName"
+        android:layout_below="@+id/etGroupName"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/button_round_corner_frame_solid_orange"
+        android:gravity="center"
+        android:text="@string/confirm"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"/>
+</RelativeLayout>
