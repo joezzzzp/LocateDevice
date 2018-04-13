@@ -14,25 +14,25 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 class HttpClient private constructor() {
 
-    companion object {
-        @Volatile private var instance : Retrofit? = null
-
-        fun getClient() : Retrofit =
-            instance ?: synchronized(this) {
-                instance ?: createRetrofitInstance().also { instance = it }
-            }
-
-        private fun createRetrofitInstance() : Retrofit {
-            val gson: Gson = GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create()
-            val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-                    .addInterceptor(HttpLoggingInterceptor()
-                            .setLevel(HttpLoggingInterceptor.Level.BODY)).build()
-            return Retrofit.Builder()
-                    .baseUrl(HttpConfig.baseUrl)
-                    .client(okHttpClient)
-                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .build()
-        }
+  companion object {
+    private val instance: Retrofit by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+      createRetrofitInstance()
     }
+
+    fun getClient(): Retrofit = instance
+
+    private fun createRetrofitInstance(): Retrofit {
+      val gson: Gson = GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+      val okHttpClient: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(HttpLoggingInterceptor()
+        .setLevel(HttpLoggingInterceptor.Level.BODY))
+        .build()
+      return Retrofit.Builder()
+        .baseUrl(HttpConfig.baseUrl)
+        .client(okHttpClient)
+        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
+    }
+  }
 }

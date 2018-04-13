@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:layout_marginTop="100dp">
+
+    <RelativeLayout
+        android:id="@+id/typeInLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/etAccount"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/account_hint"/>
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etAccount"
+            android:layout_alignStart="@+id/etAccount"
+            android:hint="@string/password_hint"/>
+
+        <FrameLayout
+            android:id="@+id/verifyCodeLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etPassword"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/etVerifyCode"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/verify_code_hint"/>
+
+            <Button
+                android:id="@+id/btnVerifyCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/get_verify_code"
+                android:background="@android:color/transparent"
+                android:layout_gravity="end"/>
+        </FrameLayout>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/btnRegisterOrLog"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_below="@+id/typeInLayout"
+        android:background="@drawable/button_round_corner_frame"
+        android:gravity="center"
+        android:textSize="24sp"
+        android:textColor="@android:color/holo_red_light"
+        android:layout_marginTop="16dp"
+        android:text="@string/login"/>
+
+    <TextView
+        android:id="@+id/tvForgetPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnRegisterOrLog"
+        android:layout_marginTop="10dp"
+        android:text="@string/forget_password"/>
+
+    <TextView
+        android:id="@+id/tvRegisterNewAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnRegisterOrLog"
+        android:layout_marginTop="10dp"
+        android:text="@string/register_account"
+        android:layout_alignEnd="@+id/btnRegisterOrLog"/>
+</RelativeLayout>
