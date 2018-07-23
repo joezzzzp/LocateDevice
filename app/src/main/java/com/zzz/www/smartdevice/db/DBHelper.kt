@@ -25,15 +25,8 @@ class DBHelper(context: Context):
     const val FIELD_DEVICE_SN = "sn"
     const val FIELD_DEVICE_NAME = "name"
     const val FIELD_DEVICE_GROUP = "group_id"
-    const val FIELD_DEVICE_LAST_UPDATE_TIME = "last_update_time"
-
-    //device history info table
-    const val HISTORY_TABLE_NAME = "history"
-    const val FIELD_HISTORY_ID = "id"
-    const val FIELD_HISTORY_DEVICE_ID = "device_id"
-    const val FIELD_HISTORY_SN = "device_sn"
-    const val FIELD_HISTORY_TIME = "time"
-    const val FIELD_HISTORY_DATA = "data"
+    const val FIELD_DEVICE_STATUS = "status"
+    const val FIELD_DEVICE_LAST_SUM_INFO = "last_sum_info"
 
     //create table sql
     private const val CREATE_GROUP_TABLE =
@@ -46,23 +39,16 @@ class DBHelper(context: Context):
         "$FIELD_DEVICE_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
         "$FIELD_DEVICE_SN TEXT NOT NULL, " +
         "$FIELD_DEVICE_NAME TEXT NOT NULL, " +
-        "$FIELD_DEVICE_LAST_UPDATE_TIME INTEGER NOT NULL, " +
+        "$FIELD_DEVICE_STATUS TEXT NOT NULL, " +
+        "$FIELD_DEVICE_LAST_SUM_INFO TEXT NOT NULL, " +
         "$FIELD_DEVICE_GROUP INTEGER NOT NULL DEFAULT -1)"
 
-    private const val CREATE_HISTORY_TABLE =
-      "CREATE TABLE IF NOT EXISTS $HISTORY_TABLE_NAME (" +
-        "$FIELD_HISTORY_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        "$FIELD_HISTORY_DEVICE_ID INTEGER NOT NULL, " +
-        "$FIELD_HISTORY_SN TEXT NOT NULL, " +
-        "$FIELD_HISTORY_TIME INTEGER NOT NULL, " +
-        "$FIELD_HISTORY_DATA TEXT NOT NULL)"
   }
 
   override fun onCreate(db: SQLiteDatabase?) {
     db?.run {
       execSQL(CREATE_GROUP_TABLE)
       execSQL(CREATE_DEVICE_TABLE)
-      execSQL(CREATE_HISTORY_TABLE)
     }
   }
 

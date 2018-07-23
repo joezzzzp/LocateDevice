@@ -2,14 +2,12 @@ package com.zzz.www.smartdevice.db
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteDatabase.CONFLICT_REPLACE
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.zzz.www.smartdevice.bean.Device
 import com.zzz.www.smartdevice.bean.DeviceInfo
+import com.zzz.www.smartdevice.bean.DeviceStatus
 import com.zzz.www.smartdevice.bean.Group
-import com.zzz.www.smartdevice.bean.InfoItem
 
 /**
  * @author zzz
@@ -138,7 +136,9 @@ class DataRepo {
             sn = getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_SN))
             name = getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_NAME))
             group = getLong(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_GROUP))
-            lastUpdateTime = getLong(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_LAST_UPDATE_TIME))
+            sumInfo = gson.fromJson(getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_LAST_SUM_INFO)),
+              DeviceInfo::class.java)
+            status = DeviceStatus.valueOf(getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_STATUS)))
           })
           moveToNext()
         }
@@ -163,7 +163,9 @@ class DataRepo {
           sn = getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_SN))
           name = getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_NAME))
           group = getLong(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_GROUP))
-          lastUpdateTime = getLong(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_LAST_UPDATE_TIME))
+          sumInfo = gson.fromJson(getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_LAST_SUM_INFO)),
+            DeviceInfo::class.java)
+          status = DeviceStatus.valueOf(getString(getColumnIndexOrThrow(DBHelper.FIELD_DEVICE_STATUS)))
         }
       }
     }
@@ -178,7 +180,8 @@ class DataRepo {
     val contentValues = ContentValues().apply {
       put(DBHelper.FIELD_DEVICE_NAME, device.name)
       put(DBHelper.FIELD_DEVICE_GROUP, device.group)
-      put(DBHelper.FIELD_DEVICE_LAST_UPDATE_TIME, device.lastUpdateTime)
+      put(DBHelper.FIELD_DEVICE_LAST_SUM_INFO, gson.toJson(device.sumInfo))
+      put(DBHelper.FIELD_DEVICE_STATUS, device.status.name)
     }
     db?.run {
       ret = device.copy()
@@ -199,7 +202,8 @@ class DataRepo {
       put(DBHelper.FIELD_DEVICE_SN, device.sn)
       put(DBHelper.FIELD_DEVICE_NAME, device.name)
       put(DBHelper.FIELD_DEVICE_GROUP, device.group)
-      put(DBHelper.FIELD_DEVICE_LAST_UPDATE_TIME, device.lastUpdateTime)
+      put(DBHelper.FIELD_DEVICE_LAST_SUM_INFO, gson.toJson(device.sumInfo))
+      put(DBHelper.FIELD_DEVICE_STATUS, device.status.name)
     }
     db?.run {
       ret.id = insertWithOnConflict(DBHelper.DEVICE_TABLE_NAME, null,
@@ -214,88 +218,13 @@ class DataRepo {
       name = device.name
       group = device.group
       sn = device.sn
-      lastUpdateTime = device.lastUpdateTime
+      sumInfo = device.sumInfo
+      status = device.status
     }
     return if (foundDevice.valid()) {
       updateDevice(foundDevice)
     } else {
       addDevice(foundDevice)
     }
-  }
-
-  fun findHistories(device: Device, start: Long, end: Long): ArrayList<DeviceInfo> {
-    val ret = arrayListOf<DeviceInfo>()
-    val db = dbHelper?.readableDatabase
-    device.sn = device.sn.toUpperCase()
-    val cursor = db?.query(DBHelper.HISTORY_TABLE_NAME, null,
-      "(${DBHelper.FIELD_HISTORY_DEVICE_ID} = ? or ${DBHelper.FIELD_HISTORY_SN} = ?) " +
-      "and ${DBHelper.FIELD_HISTORY_TIME} BETWEEN ? AND ?",
-      arrayOf(device.id.toString(), device.sn, start.toString(), end.toString()),
-      null, null, "${DBHelper.FIELD_HISTORY_TIME} DESC")
-    if (cursor != null && cursor.count > 0) {
-      cursor.run {
-        moveToFirst()
-        while (!isAfterLast) {
-          ret.add(DeviceInfo().apply {
-            id = getLong(getColumnIndexOrThrow(DBHelper.FIELD_HISTORY_ID))
-            deviceId = getLong(getColumnIndexOrThrow(DBHelper.FIELD_HISTORY_DEVICE_ID))
-            sn = getString(getColumnIndexOrThrow(DBHelper.FIELD_HISTORY_SN))
-            time = getLong(getColumnIndexOrThrow(DBHelper.FIELD_HISTORY_TIME))
-            data = gson.fromJson(getString(getColumnIndexOrThrow(DBHelper.FIELD_HISTORY_DATA)),
-              object: TypeToken<ArrayList<InfoItem>>() {}.type)
-          })
-          moveToNext()
-        }
-      }
-    }
-    cursor?.close()
-    return ret
-  }
-
-  fun addHistories(deviceInfos: ArrayList<DeviceInfo>): Boolean {
-    val db = dbHelper?.writableDatabase
-    db?.beginTransaction()
-    deviceInfos.iterator().run {
-      while (hasNext()) {
-        val item = next()
-        addHistory(db, item)
-      }
-    }
-    db?.run {
-      setTransactionSuccessful()
-      endTransaction()
-    }
-    return true
-  }
-
-  private fun addHistory(db: SQLiteDatabase?, deviceInfo: DeviceInfo): DeviceInfo {
-    val ret = DeviceInfo()
-    val contentValues = ContentValues().apply {
-      put(DBHelper.FIELD_HISTORY_DEVICE_ID, deviceInfo.deviceId)
-      put(DBHelper.FIELD_HISTORY_SN, deviceInfo.sn)
-      put(DBHelper.FIELD_HISTORY_TIME, deviceInfo.time)
-      put(DBHelper.FIELD_HISTORY_DATA, gson.toJson(deviceInfo.data))
-    }
-    db?.run {
-      ret.apply {
-        deviceId = deviceInfo.deviceId
-        sn = deviceInfo.sn
-        time = deviceInfo.time
-        data = deviceInfo.data
-      }
-      ret.id = insertWithOnConflict(DBHelper.HISTORY_TABLE_NAME, null, contentValues,
-        CONFLICT_REPLACE)
-    }
-    return ret
-  }
-
-  fun deleteHistories(device: Device): Boolean {
-    val db = dbHelper?.writableDatabase
-    db?.run {
-      return delete(DBHelper.HISTORY_TABLE_NAME,
-        "${DBHelper.FIELD_HISTORY_DEVICE_ID} = ? or ${DBHelper.FIELD_HISTORY_SN} = ?",
-        arrayOf(device.id.toString(), device.sn)) > 0
-    }
-    return false
   }
 }

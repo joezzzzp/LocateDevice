@@ -4,17 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/tvNoData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/there_is_no_data"
+        android:textSize="24sp"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvDeviceInfo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="60dp"/>
-    <Button
-        android:id="@+id/btnShowLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="@string/click_to_show_location"/>
-
+        android:layout_height="wrap_content"/>
 
 </FrameLayout>

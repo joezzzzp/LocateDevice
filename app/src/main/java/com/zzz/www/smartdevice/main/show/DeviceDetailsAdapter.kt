@@ -1,12 +1,8 @@
 package com.zzz.www.smartdevice.main.show
 
 import android.content.Context
-import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.Adapter
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.TextAppearanceSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +17,7 @@ import kotlinx.android.synthetic.main.item_device_locaion_info.view.*
  * @date create at 2018/1/4.
  */
 class DeviceDetailsAdapter(var context: Context, private var shownItems: ArrayList<Pair<String, String>>,
-                           var showHistory: Boolean = true) :
+                           private var showHistory: Boolean = true) :
   Adapter<DeviceLocationInfoViewHolder>() {
   private var inflater: LayoutInflater = LayoutInflater.from(context)
 
@@ -45,7 +41,8 @@ class DeviceDetailsAdapter(var context: Context, private var shownItems: ArrayLi
       holder.content.text = Util.createSpannable(context, content, groupName.length, content.length,
         R.style.style_can_click)
     }
-    if (shownItems.isNotEmpty() && position < shownItems.size - 1) {
+    if (shownItems.isNotEmpty() &&
+          ((showHistory && position < shownItems.size - 1) || (!showHistory && position < shownItems.size))) {
       val item: Pair<String, String> = shownItems[position]
       holder.label.text = item.first
       holder.content.text = item.second

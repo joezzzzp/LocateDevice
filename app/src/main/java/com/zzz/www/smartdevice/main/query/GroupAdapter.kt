@@ -7,8 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.zzz.www.smartdevice.R
+import com.zzz.www.smartdevice.bean.DeviceStatus
 import com.zzz.www.smartdevice.bean.Group
-import com.zzz.www.smartdevice.bean.STATUS_ABNORMAL
 import com.zzz.www.smartdevice.utils.Util
 import kotlinx.android.synthetic.main.item_group.view.*
 
@@ -45,7 +45,8 @@ class GroupAdapter(private val activity: GroupActivity): RecyclerView.Adapter<Gr
       if (adapterPosition < itemCount - 1) {
         itemView.setBackgroundResource(R.drawable.card_round_corner_frame)
         groupName.run {
-          text = if (groups[position].status == STATUS_ABNORMAL) {
+          text = if (groups[position].status == DeviceStatus.ERROR ||
+            groups[position].status == DeviceStatus.STATUS_AUTO_CHANGED) {
             val errorString = activity.getString(R.string.abnormal)
             val groupName = groups[position].name
             val concatString = groupName + errorString

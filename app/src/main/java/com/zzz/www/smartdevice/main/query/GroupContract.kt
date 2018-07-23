@@ -15,7 +15,6 @@ interface GroupContract {
     abstract fun fillGroupData(groupDevices: MutableMap<Group, ArrayList<Device>>)
     abstract fun addGroup(groupName: String)
     abstract fun deleteGroup(group: Group)
-    abstract fun getToken()
     abstract fun queryDeviceByRestApi(sn: String)
     abstract fun queryAllDeviceByRestApi(groupDevices: Map<Group, ArrayList<Device>>)
     abstract fun importFile(path: String)

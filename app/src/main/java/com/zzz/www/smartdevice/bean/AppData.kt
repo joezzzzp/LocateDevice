@@ -2,11 +2,9 @@ package com.zzz.www.smartdevice.bean
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
-import com.tckj.zyfsdk.entity.DeviceDetailsEntity.DeviceDetails.RecordsBean
-import com.zzz.www.smartdevice.api.HttpConfig
+import com.zzz.www.smartdevice.utils.Util
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -14,15 +12,15 @@ import java.util.*
  * @date create at 2018/4/23.
  */
 
-const val STATUS_NONE = 0
-const val STATUS_NORMAL = 1
-const val STATUS_ABNORMAL = 2
+enum class DeviceStatus {
+  NORMAL, ERROR, STATUS_AUTO_CHANGED
+}
 
 @SuppressLint("ParcelCreator")
 @Parcelize
 data class Group(var id: Long = -1,
                  var name: String = "",
-                 var status: Int = STATUS_NONE) : Parcelable {
+                 @Transient var status: DeviceStatus = DeviceStatus.NORMAL) : Parcelable {
   fun valid(): Boolean {
     return id > -1
   }
@@ -34,9 +32,8 @@ data class Device(var id: Long = -1,
                   var sn: String = "",
                   var name: String = "",
                   var group: Long = -1,
-                  var lastUpdateTime: Long = 0,
-                  var currentDeviceInfo: DeviceInfo? = null,
-                  var status: Int = STATUS_NONE) : Parcelable {
+                  var sumInfo: DeviceInfo? = null,
+                  var status: DeviceStatus = DeviceStatus.NORMAL) : Parcelable {
 
   fun valid(): Boolean {
     return id > -1
@@ -45,100 +42,61 @@ data class Device(var id: Long = -1,
 
 @SuppressLint("ParcelCreator")
 @Parcelize
-data class DeviceInfo(var id: Long = -1,
-                      var deviceId: Long = -1,
+data class CommonResponse(var code: Int,
+                          var message: String,
+                          var data: DeviceInfoResponse?): Parcelable
+
+@SuppressLint("ParcelCreator")
+@Parcelize
+data class DeviceInfoResponse(var id: String? = null,
+                              var sn: String = "",
+                              var name: String = "",
+                              var sumInfo: DeviceInfo? = null,
+                              var startTime: Long? = null,
+                              var updatedAt: Long? = null,
+                              var status: DeviceStatus = DeviceStatus.NORMAL): Parcelable
+
+@SuppressLint("ParcelCreator")
+@Parcelize
+data class DeviceInfo(var id: String? = null,
                       var sn: String = "",
-                      var data: @RawValue ArrayList<InfoItem> = arrayListOf(),
-                      var time: Long = -1) : Parcelable {
-  fun valid(): Boolean {
-    return id > -1
-  }
-}
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class InfoItem (var fieldName: String = "",
-                    var fieldUnit: String = "",
-                    var disPlayName: String = "",
-                    var fieldType: String = "",
-                    var fieldValue: String = "",
-                    var fieldId: String = "",
-                    var dwType: Int = 0) : Parcelable {
-
-  companion object {
-    fun createByRawValue(dataItem: Any): InfoItem {
-      return when (dataItem) {
-        is RecordsBean -> InfoItem(dataItem)
-        is DateDataItem -> InfoItem(dataItem)
-        else -> InfoItem()
-      }
+                      var collectDate: Long = 0L,
+                      var switch1: Int = 0,
+                      var switch2: Int = 0,
+                      var switch3: Int = 0,
+                      var switch4: Int = 0,
+                      var ad1: Int = 0,
+                      var ad2: Int = 0,
+                      var ad3: Int = 0,
+                      var ad4: Int = 0,
+                      var voltage: Int = 0,
+                      var gpsLongitude: Double = 0.0,
+                      var gpsLatitude: Double = 0.0,
+                      var lbsLongitude: Double = 0.0,
+                      var lbsLatitude: Double = 0.0,
+                      var launchTime: Long = 0,
+                      var battery: Int = 0,
+                      var signalIntensity: Int = 0,
+                      var status: DeviceStatus? = DeviceStatus.NORMAL) : Parcelable {
+  fun getStringPair(): ArrayList<Pair<String, String>> =
+    arrayListOf<Pair<String, String>>().apply {
+      add(Pair("序列号", sn))
+      add(Pair("采集时间", Util.formatDate(null, collectDate)))
+      add(Pair("A放电", "$switch1"))
+      add(Pair("B放电", "$switch2"))
+      add(Pair("C放电", "$switch3"))
+      add(Pair("状态", if (switch4 == 0) "故障" else "正常"))
+      add(Pair("模数转化器1", "${ad1}μA"))
+      add(Pair("模数转化器2", "${ad2}μA"))
+      add(Pair("模数转化器3", "${ad3}μA"))
+      add(Pair("模数转化器4", "${ad4}μA"))
+//      add(Pair("电压", "${voltage}Mv"))
+      add(Pair("经度(GPS)", "$gpsLongitude"))
+      add(Pair("纬度(GPS)", "$gpsLatitude"))
+      add(Pair("经度(LBS)", "$lbsLongitude"))
+      add(Pair("纬度(LBS)", "$lbsLatitude"))
+//      add(Pair("运行时长", "${launchTime}s"))
+//      add(Pair("电量", "$battery%"))
+//      add(Pair("信号强度", "${signalIntensity}dB"))
     }
-  }
-
-  constructor(recordsBean: RecordsBean): this() {
-    fieldName = recordsBean.fieldName ?: ""
-    fieldUnit = recordsBean.fieldUnit ?: ""
-    disPlayName = recordsBean.disPlayName ?: ""
-    fieldType = recordsBean.fieldType ?: ""
-    fieldValue = recordsBean.fieldValue ?: ""
-    fieldId = recordsBean.fieldId ?: ""
-    dwType = recordsBean.dwType
-  }
-
-  constructor(dateDataItem: DateDataItem): this() {
-    fieldUnit = dateDataItem.fieldUnit
-    disPlayName = dateDataItem.displayName
-    fieldType = dateDataItem.fieldType
-    fieldValue = dateDataItem.hexValues
-    fieldId = dateDataItem.fieldId
-  }
 }
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class TokenRequest(var corporateId: String = HttpConfig.corporateId,
-                        @SerializedName("corporatePasswd")
-                        var corporatePassword: String = HttpConfig.corporatePassword) : Parcelable
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class TokenResponse(var expireTime: Long = 0L,
-                         var respCode: String = "",
-                         var respMessage: String = "",
-                         var token: String = "") : Parcelable {
-  fun isSuccess() = respCode == HttpConfig.successCode
-}
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class DateDataRequest(var deviceSn: String = "",
-                       var beginDate: Long = 0L,
-                       var endDate: Long = 0L) : Parcelable
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class DateDataItem(var decimalDigit: Int = 0,
-                        var displayName: String = "",
-                        var fieldId: String = "",
-                        var fieldType: String = "",
-                        var fieldUnit: String = "",
-                        var hexValues: String = "",
-                        var numValues: Float = -1f) : Parcelable {
-  override fun toString(): String {
-    return "$decimalDigit \n $displayName \n $fieldId \n $fieldType \n $fieldUnit \n $hexValues \n $numValues"
-  }
-}
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class DateData(var collectDate: Long = 0,
-                    var deviceNum: String = "",
-                    var items: @RawValue ArrayList<DateDataItem> = arrayListOf(),
-                    var updating: Boolean = false) : Parcelable
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class DateDataResponse(var respCode: String = "",
-                        var respMessage: String = "",
-                        var t: @RawValue ArrayList<DateData> = arrayListOf()) : Parcelable
-

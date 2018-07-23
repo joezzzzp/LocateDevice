@@ -18,13 +18,12 @@ import android.text.TextUtils
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.zzz.www.smartdevice.R
-import com.zzz.www.smartdevice.bean.Device
-import com.zzz.www.smartdevice.bean.DeviceInfo
-import com.zzz.www.smartdevice.bean.Group
-import com.zzz.www.smartdevice.bean.STATUS_ABNORMAL
+import com.zzz.www.smartdevice.bean.*
+import com.zzz.www.smartdevice.db.DataRepo
 import com.zzz.www.smartdevice.main.DeviceApplication
 import com.zzz.www.smartdevice.main.show.DeviceDetailsActivity
 import com.zzz.www.smartdevice.main.show.StringListAdapter
@@ -57,13 +56,13 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
     initView()
-    presenter = GroupPresenter(this).also { it.getToken() }
+    presenter = GroupPresenter(this)
   }
 
   override fun onResume() {
     super.onResume()
+    initData()
     if (DeviceApplication.refreshAll) {
-      initData()
     }
     DeviceApplication.refreshAll = false
   }
@@ -74,7 +73,6 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
         if (resultCode == Activity.RESULT_OK) {
           val path = FileUtil.getFilePathByUri(this, data?.data)
           path?.run {
-            Toast.makeText(this@GroupActivity, "返回的文件路径为: $path", Toast.LENGTH_SHORT).show()
             if (path.endsWith(".txt", ignoreCase = true)) {
               val file = File(path)
               if (file.exists()) {
@@ -155,7 +153,7 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
   private fun showDeviceListDialog(group: Group) {
     showingGroup = group
     var showDialog = false
-    val list = layoutInflater.inflate(R.layout.dialog_list_string, null, false).apply {
+    val list = layoutInflater.inflate(R.layout.dialog_list_string, FrameLayout(this), false).apply {
       findViewById<RecyclerView>(R.id.stringList).apply {
         layoutManager = LinearLayoutManager(this@GroupActivity)
         adapter = StringListAdapter(this@GroupActivity).apply {
@@ -163,7 +161,7 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
             if (isNotEmpty()) {
               val strings: ArrayList<CharSequence> = arrayListOf()
               forEach {
-                if (it.status == STATUS_ABNORMAL) {
+                if (it.status == DeviceStatus.ERROR || it.status == DeviceStatus.STATUS_AUTO_CHANGED) {
                   val name = if (it.name.isNotEmpty()) it.name else it.sn
                   val errorString = getString(R.string.abnormal)
                   val concatString = name + errorString
@@ -194,12 +192,17 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
 
   fun itemClickAction(position: Int) {
     showingGroup?.run {
-      val deviceInfo = groupDevices[this]?.get(position)?.currentDeviceInfo
-      if (deviceInfo != null) {
-        DeviceDetailsActivity.start(this@GroupActivity, deviceInfo, true)
-      } else {
-        Toast.makeText(this@GroupActivity, getString(R.string.can_not_get_device_info), Toast.LENGTH_SHORT).show()
-      }
+      val deviceInfo = groupDevices[this]?.get(position)?.sumInfo
+      val name = groupDevices[this]?.get(position)?.run {
+        if (!TextUtils.isEmpty(name)) {
+          name
+        } else if (!TextUtils.isEmpty(sn)) {
+          sn
+        } else {
+          ""
+        }
+      } ?: ""
+      DeviceDetailsActivity.start(this@GroupActivity, deviceInfo, name, true)
     }
     deviceListDialog.dismiss()
   }
@@ -245,7 +248,10 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
 
   override fun queryDeviceResult(success: Boolean, deviceInfo: DeviceInfo) {
     if (success) {
-      DeviceDetailsActivity.start(this, deviceInfo, true)
+      val name = DataRepo.getInstance(this).findDevice(Device(sn = deviceInfo.sn)).name
+      DeviceDetailsActivity.start(this, deviceInfo, name, true)
+    } else {
+      Toast.makeText(this, getString(R.string.can_not_get_device_info), Toast.LENGTH_SHORT).show()
     }
   }
 
@@ -258,12 +264,16 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
   override fun queryAllDevicesResult(success: Boolean) {
     if (success) {
       presenter.fillGroupData(groupDevices)
+    } else {
+      Toast.makeText(this, getString(R.string.query_failed), Toast.LENGTH_SHORT).show()
     }
   }
 
   override fun importFileResult(success: Boolean) {
     if (success) {
       presenter.fillGroupData(groupDevices)
+    } else {
+      Toast.makeText(this, R.string.parse_file_failed, Toast.LENGTH_SHORT).show()
     }
   }
 
