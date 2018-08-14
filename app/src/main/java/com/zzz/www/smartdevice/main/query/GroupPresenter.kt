@@ -84,6 +84,15 @@ class GroupPresenter(view: GroupContract.View) : GroupContract.Presenter(view) {
           view.queryDeviceResult(true, this)
           return
         }
+        if (response?.sumInfo == null) {
+          val dataRepo = DataRepo.getInstance(context)
+          val device = Device(sn = sn)
+          val foundDevice = dataRepo.findDevice(device).apply {
+            this@apply.sn = sn
+            this@apply.sumInfo = DeviceInfo(sn = sn, startDate = response?.startTime ?: 0L, hasData = false)
+          }
+          DataRepo.getInstance(context).updateOrInsertDevice(foundDevice)
+        }
         view.queryDeviceResult(false, DeviceInfo())
       }
 
@@ -170,7 +179,12 @@ class GroupPresenter(view: GroupContract.View) : GroupContract.Presenter(view) {
         }
         repo.updateDevice(device.apply {
           this.sumInfo = this@run.sumInfo
-          this.sumInfo?.status = this@run.status
+          if (this.sumInfo != null) {
+            this.sumInfo?.status = this@run.status
+            this.sumInfo?.startDate = this@run.startTime ?: 0L
+          } else {
+            this.sumInfo = DeviceInfo(sn = device.sn, startDate = this@run.startTime ?: 0L, hasData = false)
+          }
           this.status = this@run.status
         })
       }

@@ -11,7 +11,7 @@ import com.zzz.www.smartdevice.bean.DeviceInfo
 interface DeviceDetailsContract {
   abstract class Presenter(protected var view: View) : BasePresenter() {
     abstract fun getHistory(sn: String, skip: Long, limit: Int)
-    abstract fun updateNewDate(sn: String)
+    abstract fun updateNewDate(sn: String, newTimeStamp: Long?)
   }
 
   interface View : BaseView {

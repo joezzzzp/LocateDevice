@@ -192,7 +192,7 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
 
   fun itemClickAction(position: Int) {
     showingGroup?.run {
-      val deviceInfo = groupDevices[this]?.get(position)?.sumInfo
+      var deviceInfo = groupDevices[this]?.get(position)?.sumInfo
       val name = groupDevices[this]?.get(position)?.run {
         if (!TextUtils.isEmpty(name)) {
           name
@@ -202,6 +202,11 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
           ""
         }
       } ?: ""
+      if (deviceInfo == null) {
+        groupDevices[this]?.get(position)?.run {
+          deviceInfo = DeviceInfo(sn = this.sn, hasData = false)
+        }
+      }
       DeviceDetailsActivity.start(this@GroupActivity, deviceInfo, name, true)
     }
     deviceListDialog.dismiss()
@@ -248,7 +253,10 @@ class GroupActivity : AppCompatActivity(), GroupContract.View {
 
   override fun queryDeviceResult(success: Boolean, deviceInfo: DeviceInfo) {
     if (success) {
-      val name = DataRepo.getInstance(this).findDevice(Device(sn = deviceInfo.sn)).name
+      var name = DataRepo.getInstance(this).findDevice(Device(sn = deviceInfo.sn)).name
+      if (TextUtils.isEmpty(name)) {
+        name = deviceInfo.sn
+      }
       DeviceDetailsActivity.start(this, deviceInfo, name, true)
     } else {
       Toast.makeText(this, getString(R.string.can_not_get_device_info), Toast.LENGTH_SHORT).show()

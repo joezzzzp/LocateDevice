@@ -14,6 +14,20 @@
         android:layout_centerInParent="true"/>
 
     <ImageButton
+        android:id="@+id/date_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/name_text_view"
+        android:layout_alignBottom="@+id/name_text_view"
+        android:background="@android:color/transparent"
+        android:scaleType="center"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/map_image_button"
+        android:layout_marginEnd="20dp"
+        android:src="@drawable/ic_time"
+    />
+
+    <ImageButton
         android:id="@+id/map_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

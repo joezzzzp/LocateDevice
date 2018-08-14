@@ -19,6 +19,7 @@ interface DeviceApi {
     Observable<List<DeviceInfo>>
 
   @GET("updateDate")
-  fun updateNewDate(@Query("sn") sn: String): Observable<CommonResponse>
+  fun updateNewDate(@Query("sn") sn: String,
+                    @Query("newTimeStamp") newTimeStamp: Long?): Observable<CommonResponse>
 
 }

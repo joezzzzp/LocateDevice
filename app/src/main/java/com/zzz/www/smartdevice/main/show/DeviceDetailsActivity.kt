@@ -1,6 +1,8 @@
 package com.zzz.www.smartdevice.main.show
 
+import android.app.DatePickerDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.ActionBar
@@ -8,12 +10,10 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.baidu.mapapi.model.LatLng
 import com.zzz.www.smartdevice.R
 import com.zzz.www.smartdevice.bean.Device
@@ -26,6 +26,8 @@ import com.zzz.www.smartdevice.main.location.MapActivity
 import com.zzz.www.smartdevice.utils.Util
 import com.zzz.www.smartdevice.widget.ProgressDialog
 import kotlinx.android.synthetic.main.activity_device_location_info.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * @author zzz
@@ -84,8 +86,9 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
   private fun initData(deviceInfo: DeviceInfo?) {
     deviceInfo?.run {
       this@DeviceDetailsActivity.deviceInfo = deviceInfo
+      val isHistory = intent.getBooleanExtra(isHistoryKey, false)
       deviceInfoAdapter = DeviceDetailsAdapter(this@DeviceDetailsActivity,
-        deviceInfo2Items(deviceInfo), intent.getBooleanExtra(isHistoryKey, false))
+        deviceInfo2Items(deviceInfo), isHistory)
       rvDeviceInfo.run {
         layoutManager = LinearLayoutManager(this@DeviceDetailsActivity)
         adapter = deviceInfoAdapter
@@ -97,11 +100,13 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
         customView =
           LayoutInflater.from(this@DeviceDetailsActivity).inflate(R.layout.action_bar_view,
             FrameLayout(this@DeviceDetailsActivity), false).apply {
+
             val shownName = deviceName + when (deviceInfo.status) {
               DeviceStatus.ERROR -> getString(R.string.abnormal)
               DeviceStatus.STATUS_AUTO_CHANGED -> getString(R.string.status_changed)
               else -> ""
             }
+
             findViewById<TextView>(R.id.name_text_view).run {
               if (deviceInfo.status == DeviceStatus.ERROR || deviceInfo.status == DeviceStatus.STATUS_AUTO_CHANGED) {
                 text = Util.createSpannable(this@DeviceDetailsActivity, shownName,
@@ -111,7 +116,7 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
                 setOnClickListener {
                   AlertDialog.Builder(this@DeviceDetailsActivity).setMessage(message).
                     setPositiveButton(R.string.confirm) { dialog, _ ->
-                      presenter.updateNewDate(deviceInfo.sn)
+                      presenter.updateNewDate(deviceInfo.sn, null)
                       dialog?.dismiss()
                     }.setNegativeButton(R.string.cancel) { dialog, _ -> dialog?.dismiss() }.show()
                 }
@@ -119,7 +124,24 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
                 text = shownName
               }
             }
-            findViewById<ImageButton>(R.id.map_image_button).setOnClickListener { gotoMapActivity() } }
+
+            findViewById<ImageButton>(R.id.map_image_button).setOnClickListener {
+              if (deviceInfo.hasData) {
+                gotoMapActivity()
+              } else {
+                Toast.makeText(this@DeviceDetailsActivity, R.string.there_is_no_data, Toast.LENGTH_SHORT).show()
+              }
+            }
+
+            findViewById<ImageButton>(R.id.date_image_button).run {
+              if (!isHistory) {
+                visibility = View.GONE
+              } else {
+                visibility = View.VISIBLE
+                setOnClickListener { showDatePicker() }
+              }
+            }
+          }
       }
       return
     }
@@ -128,10 +150,59 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
       customView = LayoutInflater.from(this@DeviceDetailsActivity).inflate(R.layout.action_bar_view,
         FrameLayout(this@DeviceDetailsActivity), false).apply {
         findViewById<TextView>(R.id.name_text_view).text = deviceName
+        findViewById<ImageButton>(R.id.date_image_button).visibility = View.GONE
+        findViewById<ImageButton>(R.id.map_image_button).visibility = View.GONE
       }
     }
     rvDeviceInfo.visibility = View.GONE
     tvNoData.visibility = View.VISIBLE
+  }
+
+  private fun showDatePicker() {
+    val calendar = Calendar.getInstance(Locale.CHINA)
+    var year = calendar[Calendar.YEAR]
+    var month = calendar[Calendar.MONTH] + 1
+    var day = calendar[Calendar.DAY_OF_MONTH]
+    val datePicker = DatePicker(this).apply {
+      init(calendar[Calendar.YEAR],
+        calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH]) { _, y, m, d ->
+        year = y
+        month = m + 1
+        day = d
+      }
+    }
+    AlertDialog.Builder(this).setView(datePicker).
+      setPositiveButton(R.string.confirm) { _, _ -> showTimePicker(year, month, day) }.setCancelable(true).show()
+  }
+
+  private fun showTimePicker(year: Int, month: Int, day: Int) {
+    val calendar = Calendar.getInstance(Locale.CHINA)
+    var hour = calendar[Calendar.HOUR_OF_DAY]
+    var minute = calendar[Calendar.MINUTE]
+    val timePicker = TimePicker(this).apply {
+      setIs24HourView(true)
+      currentHour = calendar[Calendar.HOUR_OF_DAY]
+      currentMinute = calendar[Calendar.MINUTE]
+      setOnTimeChangedListener { _, h, m ->
+        hour = h
+        minute = m
+      }
+    }
+    AlertDialog.Builder(this).setView(timePicker).setCancelable(true).
+      setPositiveButton(R.string.confirm) { _, _ ->
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA)
+        val dateTimeString = "$year-${padInt(month)}-${padInt(day)} ${padInt(hour)}:${padInt(minute)}"
+        val timestamp = formatter.parse(dateTimeString).time
+        presenter.updateNewDate(deviceInfo.sn, timestamp)
+      }.show()
+  }
+
+  private fun padInt(value: Int): String {
+    var ret = value.toString()
+    if (value < 10) {
+      ret = "0$ret"
+    }
+    return ret
   }
 
   private fun gotoMapActivity() {
@@ -247,7 +318,16 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
 
   private fun deviceInfo2Items(deviceInfo: DeviceInfo): ArrayList<Pair<String, String>> {
     val items = arrayListOf<Pair<String, String>>()
-    items.addAll(deviceInfo.getStringPair())
+    if (deviceInfo.hasData) {
+      items.addAll(deviceInfo.getStringPair())
+    } else {
+      if (!TextUtils.isEmpty(deviceInfo.sn)) {
+        items.add(Pair(getString(R.string.serial_number), deviceInfo.sn))
+      }
+      if(deviceInfo.startDate > 0L) {
+        items.add(Pair(getString(R.string.start_date_time), Util.formatDate(null, deviceInfo.startDate)))
+      }
+    }
     if (intent.getBooleanExtra(isHistoryKey, false)) {
       items.add(Pair(getString(R.string.group_name_belongs_to), getGroupName()))
     }
@@ -290,6 +370,9 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
 
   override fun updateNewDateResult(isSuccess: Boolean, deviceInfo: DeviceInfo?) {
     if (isSuccess) {
+      historyListAdapter?.removeAll()
+      canLoadMore = true
+      skip = 0
       initData(deviceInfo)
     } else {
       Toast.makeText(this, R.string.query_failed, Toast.LENGTH_SHORT).show()

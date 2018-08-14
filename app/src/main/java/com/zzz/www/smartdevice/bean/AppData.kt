@@ -60,6 +60,7 @@ data class DeviceInfoResponse(var id: String? = null,
 @Parcelize
 data class DeviceInfo(var id: String? = null,
                       var sn: String = "",
+                      var startDate: Long = 0L,
                       var collectDate: Long = 0L,
                       var switch1: Int = 0,
                       var switch2: Int = 0,
@@ -77,10 +78,12 @@ data class DeviceInfo(var id: String? = null,
                       var launchTime: Long = 0,
                       var battery: Int = 0,
                       var signalIntensity: Int = 0,
-                      var status: DeviceStatus? = DeviceStatus.NORMAL) : Parcelable {
+                      var status: DeviceStatus? = DeviceStatus.NORMAL,
+                      var hasData: Boolean = true) : Parcelable {
   fun getStringPair(): ArrayList<Pair<String, String>> =
     arrayListOf<Pair<String, String>>().apply {
       add(Pair("序列号", sn))
+      add(Pair("启用时间", Util.formatDate(null, startDate)))
       add(Pair("采集时间", Util.formatDate(null, collectDate)))
       add(Pair("A放电", "$switch1"))
       add(Pair("B放电", "$switch2"))

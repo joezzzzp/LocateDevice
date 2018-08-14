@@ -53,4 +53,7 @@
   <string name="clear_status_changed">设备曾出现故障，现状态正常，是否已修理过故障设备？</string>
 
   <string name="there_is_no_data">暂无数据</string>
+
+  <string name="start_date_time">启用时间</string>
+  <string name="serial_number">序列号</string>
 </resources>

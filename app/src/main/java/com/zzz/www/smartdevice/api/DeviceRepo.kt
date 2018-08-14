@@ -28,6 +28,6 @@ class DeviceRepo private constructor() {
   fun getDeviceHistorySumInfo(sn: String, skip: Long, limit: Int): Observable<List<DeviceInfo>> =
     api.getDeviceHistorySumInfo(sn, skip, limit).compose(schedulers())
 
-  fun updateNewDate(sn: String): Observable<CommonResponse> =
-    api.updateNewDate(sn).compose(schedulers())
+  fun updateNewDate(sn: String, newTimeStamp: Long?): Observable<CommonResponse> =
+    api.updateNewDate(sn, newTimeStamp).compose(schedulers())
 }
