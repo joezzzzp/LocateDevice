@@ -73,7 +73,11 @@ class GroupPresenter(view: GroupContract.View) : GroupContract.Presenter(view) {
     view.showLoading()
     DeviceRepo.get().getDeviceSumInfo(sn).subscribe(object : Subscriber<DeviceInfoResponse>() {
       override fun onNext(response: DeviceInfoResponse?) {
+        val startDate = response?.startTime ?: 0L
+        val status = response?.status
         response?.sumInfo?.run {
+          this.status = status
+          this.startDate = startDate
           val dataRepo = DataRepo.getInstance(context)
           val device = Device(sn = sn)
           val foundDevice = dataRepo.findDevice(device).apply {

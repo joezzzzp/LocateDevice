@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<android.support.v7.widget.RecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/stringList"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
@@ -9,11 +10,5 @@
     android:paddingEnd="30dp"
     android:paddingTop="16dp"
     android:paddingBottom="16dp">
+</android.support.v7.widget.RecyclerView>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/stringList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </android.support.v7.widget.RecyclerView>
-
-</android.support.constraint.ConstraintLayout>

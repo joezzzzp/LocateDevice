@@ -39,7 +39,6 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
   private lateinit var deviceInfo: DeviceInfo
   private var historyListAdapter: StringListAdapter? = null
   private var groupListAdapter: StringListAdapter? = null
-  private var listView: View? = null
   private var stringRecyclerView: RecyclerView? = null
   private var historyDeviceInfo: ArrayList<DeviceInfo> = arrayListOf()
   private var allGroups: ArrayList<Group> = arrayListOf()
@@ -223,9 +222,9 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
   }
 
   fun showHistoryDialog() {
-    if (listView == null || stringRecyclerView == null || historyListAdapter == null) {
-      listView = layoutInflater.inflate(R.layout.dialog_list_string, FrameLayout(this), false)
-      stringRecyclerView = listView?.findViewById(R.id.stringList)
+    if (stringRecyclerView == null || historyListAdapter == null) {
+      stringRecyclerView =
+        layoutInflater.inflate(R.layout.dialog_list_string, FrameLayout(this), false) as RecyclerView
       historyListAdapter = StringListAdapter(this@DeviceDetailsActivity)
       stringRecyclerView?.apply {
         layoutManager = LinearLayoutManager(this@DeviceDetailsActivity)
@@ -243,7 +242,7 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
       }
     }
     if (historyDialog == null) {
-      historyDialog = AlertDialog.Builder(this).setView(listView).setCancelable(true)
+      historyDialog = AlertDialog.Builder(this).setView(stringRecyclerView).setCancelable(true)
         .setOnDismissListener { dialogType = SHOWING_NO_DIALOG }.create()
     }
     historyDialog?.show()

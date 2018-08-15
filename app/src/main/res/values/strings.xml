@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">设备查询</string>
+  <string name="app_name">西润检测</string>
   <string name="sn_edit_hint">请输入设备序列号(sn)</string>
   <string name="sn_empty_hint">设备号不能为空</string>
   <string name="query_button">查询</string>
