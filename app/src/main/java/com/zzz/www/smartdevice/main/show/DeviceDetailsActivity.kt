@@ -1,8 +1,6 @@
 package com.zzz.www.smartdevice.main.show
 
-import android.app.DatePickerDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.ActionBar
@@ -15,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import com.baidu.mapapi.model.LatLng
+import com.baidu.mapapi.utils.CoordinateConverter
 import com.zzz.www.smartdevice.R
 import com.zzz.www.smartdevice.bean.Device
 import com.zzz.www.smartdevice.bean.DeviceInfo
@@ -56,7 +55,7 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
 
   companion object {
     private const val dataKey: String = "DEVICE_INFO_DATA"
-    private const val isHistoryKey: String = "DEVICE_INFO_HISTORY_DATA"
+    private const val shouldShowHistoryKey: String = "DEVICE_INFO_HISTORY_DATA"
     private const val deviceNameKey: String = "DEVICE_NAME"
     private const val PAGE_SIZE = 10
 
@@ -67,7 +66,7 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
     fun start(context: Context, deviceInfo: DeviceInfo?, name: String, showHistory: Boolean) {
       val intent = Intent(context, DeviceDetailsActivity::class.java)
       intent.putExtra(dataKey, deviceInfo)
-      intent.putExtra(isHistoryKey, showHistory)
+      intent.putExtra(shouldShowHistoryKey, showHistory)
       intent.putExtra(deviceNameKey, name)
       context.startActivity(intent)
     }
@@ -85,7 +84,7 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
   private fun initData(deviceInfo: DeviceInfo?) {
     deviceInfo?.run {
       this@DeviceDetailsActivity.deviceInfo = deviceInfo
-      val isHistory = intent.getBooleanExtra(isHistoryKey, false)
+      val isHistory = intent.getBooleanExtra(shouldShowHistoryKey, false)
       deviceInfoAdapter = DeviceDetailsAdapter(this@DeviceDetailsActivity,
         deviceInfo2Items(deviceInfo), isHistory)
       rvDeviceInfo.run {
@@ -209,15 +208,20 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
       var latitude = lbsLatitude
       var longitude = lbsLongitude
       var useGps = false
+      val converter = CoordinateConverter()
       if (gpsLatitude != 0.0 || gpsLongitude != 0.0) {
         latitude = gpsLatitude
         longitude = gpsLongitude
         useGps = true
+        converter.from(CoordinateConverter.CoordType.GPS)
       }
       if (!useGps) {
         Toast.makeText(this@DeviceDetailsActivity, getString(R.string.hint_no_gps), Toast.LENGTH_SHORT).show()
+        converter.from(CoordinateConverter.CoordType.GPS)
       }
-      MapActivity.start(this@DeviceDetailsActivity, LatLng(latitude, longitude))
+      val sourcePoint = LatLng(latitude, longitude)
+      val realPoint = converter.coord(sourcePoint).convert()
+      MapActivity.start(this@DeviceDetailsActivity, realPoint)
     }
   }
 
@@ -318,7 +322,7 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
   private fun deviceInfo2Items(deviceInfo: DeviceInfo): ArrayList<Pair<String, String>> {
     val items = arrayListOf<Pair<String, String>>()
     if (deviceInfo.hasData) {
-      items.addAll(deviceInfo.getStringPair())
+      items.addAll(deviceInfo.getStringPair(intent.getBooleanExtra(shouldShowHistoryKey, false)))
     } else {
       if (!TextUtils.isEmpty(deviceInfo.sn)) {
         items.add(Pair(getString(R.string.serial_number), deviceInfo.sn))
@@ -327,7 +331,7 @@ class DeviceDetailsActivity : AppCompatActivity(), DeviceDetailsContract.View {
         items.add(Pair(getString(R.string.start_date_time), Util.formatDate(null, deviceInfo.startDate)))
       }
     }
-    if (intent.getBooleanExtra(isHistoryKey, false)) {
+    if (intent.getBooleanExtra(shouldShowHistoryKey, false)) {
       items.add(Pair(getString(R.string.group_name_belongs_to), getGroupName()))
     }
     return items

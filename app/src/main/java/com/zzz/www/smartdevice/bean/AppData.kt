@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Parcelable
 import com.zzz.www.smartdevice.utils.Util
 import kotlinx.android.parcel.Parcelize
-import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -80,26 +79,27 @@ data class DeviceInfo(var id: String? = null,
                       var signalIntensity: Int = 0,
                       var status: DeviceStatus? = DeviceStatus.NORMAL,
                       var hasData: Boolean = true) : Parcelable {
-  fun getStringPair(): ArrayList<Pair<String, String>> =
+  fun getStringPair(shouldShowHistory: Boolean): ArrayList<Pair<String, String>> =
     arrayListOf<Pair<String, String>>().apply {
       add(Pair("序列号", sn))
       add(Pair("启用时间", Util.formatDate(null, startDate)))
       add(Pair("采集时间", Util.formatDate(null, collectDate)))
-      add(Pair("A放电", "$switch1"))
-      add(Pair("B放电", "$switch2"))
-      add(Pair("C放电", "$switch3"))
+      add(Pair(if (shouldShowHistory) "A-雷击总数" else "A-雷击", handleSwitch(switch1, shouldShowHistory)))
+      add(Pair(if (shouldShowHistory) "B-雷击总数" else "B-雷击", handleSwitch(switch2, shouldShowHistory)))
+      add(Pair(if (shouldShowHistory) "C-雷击总数" else "C-雷击", handleSwitch(switch3, shouldShowHistory)))
       add(Pair("状态", if (switch4 == 0) "故障" else "正常"))
       add(Pair("模数转化器1", "${ad1}μA"))
       add(Pair("模数转化器2", "${ad2}μA"))
       add(Pair("模数转化器3", "${ad3}μA"))
       add(Pair("模数转化器4", "${ad4}μA"))
-//      add(Pair("电压", "${voltage}Mv"))
-      add(Pair("经度(GPS)", "$gpsLongitude"))
-      add(Pair("纬度(GPS)", "$gpsLatitude"))
-      add(Pair("经度(LBS)", "$lbsLongitude"))
-      add(Pair("纬度(LBS)", "$lbsLatitude"))
-//      add(Pair("运行时长", "${launchTime}s"))
-//      add(Pair("电量", "$battery%"))
-//      add(Pair("信号强度", "${signalIntensity}dB"))
+      add(Pair("GPS定位", if (gpsLatitude != 0.0 && gpsLongitude != 0.0) "是" else "否"))
+      add(Pair("LBS定位", if (lbsLatitude != 0.0 && lbsLongitude != 0.0) "是" else "否"))
     }
+
+  private fun handleSwitch(switch: Int, shouldShowHistory: Boolean): String {
+    if (!shouldShowHistory) {
+      return if (switch == 0) "是" else "否"
+    }
+    return "$switch"
+  }
 }
