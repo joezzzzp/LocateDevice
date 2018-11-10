@@ -9,6 +9,7 @@ import com.zzz.www.smartdevice.utils.Util
 import rx.Observable
 import rx.Subscriber
 import rx.android.schedulers.AndroidSchedulers
+import rx.functions.Func1
 import rx.schedulers.Schedulers
 
 
@@ -120,12 +121,23 @@ class GroupPresenter(view: GroupContract.View) : GroupContract.Presenter(view) {
         queue.add(query(groupDevice.key, device))
       }
     }
-    Observable.concat(queue).observeOn(AndroidSchedulers.mainThread()).doOnTerminate {
-      view.hideLoading()
-      view.queryAllDevicesResult(true)
+    doQuery(queue, 0)
+  }
+
+  private fun doQuery(queue: ArrayList<Observable<QueryResult>>, count: Int) {
+    var localCount = count
+    val subQueue = queue.subList(count, queue.size)
+    var shouldContinue = false
+    Observable.concat(subQueue).observeOn(AndroidSchedulers.mainThread()).doAfterTerminate {
+      if(shouldContinue) {
+        doQuery(queue, localCount)
+      } else {
+        view.hideLoading()
+        view.queryAllDevicesResult(true)
+      }
     }.subscribe(object : Subscriber<QueryResult>() {
       override fun onNext(t: QueryResult?) {
-
+        localCount++
       }
 
       override fun onCompleted() {
@@ -133,7 +145,10 @@ class GroupPresenter(view: GroupContract.View) : GroupContract.Presenter(view) {
       }
 
       override fun onError(e: Throwable?) {
-        view.queryAllDevicesResult(false)
+        localCount++
+        if (localCount < queue.size) {
+          shouldContinue = true
+        }
       }
 
     })
@@ -159,7 +174,6 @@ class GroupPresenter(view: GroupContract.View) : GroupContract.Presenter(view) {
         }
 
         override fun onError(e: Throwable?) {
-          e?.printStackTrace()
           view.importFileResult(false)
           view.hideLoading()
         }

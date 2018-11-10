@@ -98,7 +98,7 @@ data class DeviceInfo(var id: String? = null,
 
   private fun handleSwitch(switch: Int, shouldShowHistory: Boolean): String {
     if (!shouldShowHistory) {
-      return if (switch == 0) "是" else "否"
+      return if (switch == 0) "雷击" else "未雷击"
     }
     return "$switch"
   }

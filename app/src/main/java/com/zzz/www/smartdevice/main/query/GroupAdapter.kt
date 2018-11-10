@@ -76,7 +76,7 @@ class GroupAdapter(private val activity: GroupActivity): RecyclerView.Adapter<Gr
         }
         setOnLongClickListener {
           if (adapterPosition < itemCount - 1) {
-            activity.showDeleteDialog(groups[position])
+            activity.showDeleteDialog(groups[adapterPosition])
           }
           return@setOnLongClickListener true
         }
