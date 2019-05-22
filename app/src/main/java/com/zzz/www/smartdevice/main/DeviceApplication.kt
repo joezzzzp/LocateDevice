@@ -23,8 +23,8 @@ class DeviceApplication : Application() {
 
   private fun initStetho() {
     Stetho.initialize(Stetho.newInitializerBuilder(this)
-      .enableDumpapp({ Stetho.DefaultDumperPluginsBuilder(instance).finish() })
-      .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+      .enableDumpapp { Stetho.DefaultDumperPluginsBuilder(instance).finish() }
+            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
       .build())
   }
 }
